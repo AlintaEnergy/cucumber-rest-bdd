@@ -98,8 +98,9 @@ def parse_type(type)
 end
 
 def get_resource(name)
-    resource = name.parameterize
-    resource = (ENV.has_key?('resource_single') && ENV['resource_single'] == 'true') ? resource.singularize : resource.pluralize
+    name = name.parameterize
+    name = (ENV.has_key?('resource_single') && ENV['resource_single'] == 'true') ? name.singularize : name.pluralize
+    return name
 end
 
 def get_root_data_key()
@@ -115,7 +116,7 @@ def get_json_path(names)
 end
 
 def get_parameters(names)
-    names.split(':').map { |n| get_parameter(n) }
+    return names.split(':').map { |n| get_parameter(n) }
 end
 
 def get_parameter(name)
@@ -126,7 +127,7 @@ def get_parameter(name)
         name = name.parameterize(separator: separator)
         name = name.camelize(:lower) if (ENV.has_key?('field_camel') && ENV['field_camel'] == 'true')
     end
-    name
+    return name
 end
 
 def get_attributes(hashes)
