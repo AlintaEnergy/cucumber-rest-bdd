@@ -9,7 +9,7 @@ end
 
 Then(/^the response #{HAVE_SYNONYM} ([\w\s]+|`[^`]*`) of type (datetime|guid)$/) do |names, type|
     regex = case type
-    when 'datetime' then /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{1,3}[+|-]\d{2}:\d{2}$/i
+    when 'datetime' then /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?(?:[+|-]\d{2}:\d{2})?$/i
     when 'guid' then /^[{(]?[0-9A-F]{8}[-]?([0-9A-F]{4}[-]?){3}[0-9A-F]{12}[)}]?$/i
     else 'UNKNOWN'
     end
@@ -45,7 +45,7 @@ Then(/^the response ((?:#{HAVE_SYNONYM} (?:a|an|(?:(?:#{FEWER_MORE_THAN})?\s*#{C
 end
 
 Then(/^the response ((?:#{HAVE_SYNONYM} (?:a|an|(?:(?:#{FEWER_MORE_THAN})?\s*#{CAPTURE_INT}|\d+)) (?:[\w\s]+|`[^`]*`) )*)#{HAVE_SYNONYM} (?:the )?(?:following )?value "([^"]*)"$/) do |nesting, value|
-    expected = resolve(value)
+    expected = value
     groups = nesting
     grouping = get_grouping(groups)
     grouping.push({
