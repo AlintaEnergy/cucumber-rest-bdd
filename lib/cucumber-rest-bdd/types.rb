@@ -116,13 +116,13 @@ def get_json_path(names)
 end
 
 def get_parameters(names)
-    return names.split(':').map { |n| get_parameter(n) }
+    return names.split(':').map { |n| get_parameter(n.strip) }
 end
 
 def get_parameter(name)
     if name[0] == '`' && name[-1] == '`'
         name = name[1..-2]
-    else
+    elsif name[0] != '[' || name[-1] != ']'
         separator = ENV.has_key?('field_separator') ? ENV['field_separator'] : '_'
         name = name.parameterize(separator: separator)
         name = name.camelize(:lower) if (ENV.has_key?('field_camel') && ENV['field_camel'] == 'true')
@@ -137,7 +137,26 @@ def get_attributes(hashes)
       value.gsub!(/\\n/, "\n")
       type = parse_type(type)
       names = get_parameters(name)
-      new_hash = names.reverse.inject(value.to_type(type.camelize.constantize)) { |a, n| { n => a } }
-      hash.deep_merge!(new_hash)
+      new_hash = names.reverse.inject(value.to_type(type.camelize.constantize)) { |a, n| add_to_hash(a, n) }
+      hash.deep_merge!(new_hash) { |key, old, new| new.kind_of?(Array) ? merge_arrays(old, new) : new }
     end
+end
+
+def add_to_hash(a, n)
+    result = nil    
+    if (n[0] == '[' && n[-1] == ']') then
+        array = Array.new(n[1..-2].to_i() + 1)
+        array[n[1..-2].to_i()] = a
+        result = array
+    end
+    result != nil ? result : { n => a };
+end
+
+def merge_arrays(a, b)
+    new_length = [a.length, b.length].max
+    new_array = Array.new(new_length)
+    new_length.times do |n|
+        new_array[n] = b[n] == nil ? a[n] : b[n]
+    end
+    return new_array
 end

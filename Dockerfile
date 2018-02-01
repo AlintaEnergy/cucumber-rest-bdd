@@ -1,7 +1,7 @@
 FROM ruby
 
 MAINTAINER "Matt Hosking <matt.hosking@alintaenergy.com.au>"
-LABEL version="0.5.4" \
+LABEL version="0.5.9" \
       license="MIT"
 
 COPY . /usr/local/cucumber-rest-bdd
