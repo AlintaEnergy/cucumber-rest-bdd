@@ -1,13 +1,9 @@
 Given(/^I retrieve the API Management subscription key secret "(.*?)" from Azure Storage Vault "(.*?)" using tenant "(.*?)" with credentials "(.*?)" and "(.*?)"$/) do |secret_name, vault_name, tenant_id, client_id, client_secret|
     if @apim_subscription_key.to_s.empty?
-        @apim_subscription_key = ENV['apim_subscription_key']
-        
-        if @apim_subscription_key.to_s.empty?
-            steps %Q{
-                Given I retrieve the secret "#{secret_name}" from Azure Storage Vault "#{vault_name}" using tenant "#{tenant_id}" with credentials "#{client_id}" and "#{client_secret}"
-            }
-            @apim_subscription_key = @response.get_as_type "$..value", "string"
-        end
+        steps %Q{
+            Given I retrieve the secret "#{secret_name}" from Azure Storage Vault "#{vault_name}" using tenant "#{tenant_id}" with credentials "#{client_id}" and "#{client_secret}"
+        }
+        @apim_subscription_key = @response.get_as_type "$..value", "string"
     end
 end
 
