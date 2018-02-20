@@ -1,10 +1,10 @@
-Given(/^I retrieve the API Management subscription key$/) do
+Given(/^I retrieve the API Management subscription key secret "(.*?)" from Azure Storage Vault "(.*?)" using tenant "(.*?)" with credentials "(.*?)" and "(.*?)"$/) do |secret_name, vault_name, tenant_id, client_id, client_secret|
     if @apim_subscription_key.to_s.empty?
         @apim_subscription_key = ENV['apim_subscription_key']
         
         if @apim_subscription_key.to_s.empty?
             steps %Q{
-                Given I retrieve the secret "APIMgmnt--End2End--Starter--Primary" from Azure Storage Vault
+                Given I retrieve the secret "#{secret_name}" from Azure Storage Vault "#{vault_name}" using tenant "#{tenant_id}" with credentials "#{client_id}" and "#{client_secret}"
             }
             @apim_subscription_key = @response.get_as_type "$..value", "string"
         end
@@ -18,16 +18,9 @@ Given(/^I add the API Management key header$/) do
     }
 end
 
-Given(/^I retrieve the secret "(.*?)" from Azure Storage Vault$/) do |secret_name|
-    tenant_id = ENV['ALINTA_TENANTID']
-    client_id = ENV['ALINTA_CLIENTID']
-    client_secret = ENV['ALINTA_CLIENTSECRET']
-    vault_name = ENV['ALINTA_VAULT']
-    if tenant_id.nil? or client_id.nil? or client_secret.nil? or vault_name.nil?
-        fail('One or more required environment variables have not been defined.')
-    end
+Given(/^I retrieve the secret "(.*?)" from Azure Storage Vault "(.*?)" using tenant "(.*?)" with credentials "(.*?)" and "(.*?)"$/) do |secret_name, vault_name, tenant_id, client_id, client_secret|
     steps %Q{
-        Given I authenticate with Azure Storage Vault tenant "#{tenant_id}" using client credentials "#{client_id}" and "#{client_secret}"
+        Given I authenticate with Azure tenant "#{tenant_id}" using client credentials "#{client_id}" and "#{client_secret}"
     }
     access_token = @response.get_as_type "$..access_token", "string"
     steps %Q{
@@ -35,7 +28,7 @@ Given(/^I retrieve the secret "(.*?)" from Azure Storage Vault$/) do |secret_nam
     }
 end
 
-Given(/^I authenticate with Azure Storage Vault tenant "(.*?)" using client credentials "(.*?)" and "(.*?)"$/) do |tenant_id, client_id, client_secret|
+Given(/^I authenticate with Azure tenant "(.*?)" using client credentials "(.*?)" and "(.*?)"$/) do |tenant_id, client_id, client_secret|
     steps %Q{
         Given I authenticate with "https://login.windows.net/#{tenant_id}/oauth2/token" using client credentials "#{client_id}" and "#{client_secret}"
     }

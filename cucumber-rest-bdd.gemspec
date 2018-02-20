@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name          = 'alinta-cucumber-rest-bdd'
-  s.version       = '0.5.10'
+  s.version       = '0.5.11'
   s.version       = "#{s.version}-#{ENV['TRAVIS_BUILD_NUMBER']}" if ENV['TRAVIS'] && ENV['TRAVIS_TAG'] == ''
   s.platform      = Gem::Platform::RUBY
   s.date          = '2018-02-20'
