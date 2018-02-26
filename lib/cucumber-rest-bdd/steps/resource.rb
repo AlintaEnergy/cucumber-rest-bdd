@@ -13,6 +13,10 @@ Given(/^I am a client$/) do
     }
 end
 
+Given(/^I am issuing requests for (.+?)$/) do |resource|
+    @urlbasepath = get_resource(resource)
+end
+
 # GET
 
 When(/^I request (?:an?(?! list)|the) ([^"]+?)(?: with (?:key|id))? "([^"]*)"(#{LEVELS})?$/) do |resource, id, levels|
