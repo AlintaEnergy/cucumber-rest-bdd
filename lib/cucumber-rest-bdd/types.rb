@@ -1,14 +1,40 @@
 require 'active_support/inflector'
 
-CAPTURE_INT = Transform(/^(?:zero|one|two|three|four|five|six|seven|eight|nine|ten)$/) do |v|
-    %w(zero one two three four five six seven eight nine ten).index(v)
-end
-
-FEWER_MORE_THAN = Transform(/^(?:(?:fewer|less|more) than|at (?:least|most))$/) do |v|
-    to_compare(v)
-end
-
 HAVE_SYNONYM = %{(?:has|have|having|contain|contains|containing|with)}
+RESOURCE_NAME = '[\w\s]+'
+RESOURCE_NAME_CAPTURE = /([\w\s]+)/
+ARTICLE = %{(?:an?|the)}
+FIELD_NAME_SYNONYM = %q{[\w\s]+|`[^`]*`}
+FEWER_MORE_THAN_SYNONYM = %q{(?:fewer|less|more) than|at (?:least|most)}
+INT_AS_WORDS_SYNONYM = %q{zero|one|two|three|four|five|six|seven|eight|nine|ten}
+
+ParameterType(
+    name: 'field_name',
+    regexp: /[\w\s]+|`[^`]*`/,
+    transformer: -> (s) { get_fields(s) },
+    use_for_snippets: false
+)
+
+ParameterType(
+  name: 'int_as_words',
+  regexp: /#{INT_AS_WORDS_SYNONYM}/,
+  transformer: -> (s) { to_num(s) }
+)
+
+ParameterType(
+  name: 'fewer_more_than',
+  regexp: /#{FEWER_MORE_THAN_SYNONYM}/,
+  transformer: -> (s) { to_compare(s) }
+)
+
+ParameterType(
+    name: 'list_has_count',
+    regexp: /a|an|(?:(#{FEWER_MORE_THAN_SYNONYM})\s+)?(#{INT_AS_WORDS_SYNONYM})/,
+    transformer: -> (count_mod, count) {
+        ListCountComparison.new(count_mod.nil? ? to_compare(count_mod) : CMP_EQUALS, count.nil? ? to_num(count) : 1)
+    },
+    use_for_snippets: false
+)
 
 CMP_LESS_THAN = '<'
 CMP_MORE_THAN = '>'
@@ -40,7 +66,7 @@ def compare_to_string(compare)
     end
 end
 
-# compare two numbers using the FEWER_MORE_THAN optional modifier
+# compare two numbers using the fewer_more_than optional modifier
 def num_compare(type, left, right)
     case type
     when CMP_LESS_THAN then left < right
@@ -79,6 +105,24 @@ class String
   end
 end
 
+class ListCountComparison
+    def initialize(type, amount)
+        @type = type
+        @amount = amount
+    end
+
+    def compare(actual)
+        case @type
+            when CMP_LESS_THAN then actual < @amount
+            when CMP_MORE_THAN then actual > @amount
+            when CMP_AT_MOST then actual <= @amount
+            when CMP_AT_LEAST then actual >= @amount
+            when CMP_EQUALS then actual == @amount
+            else actual == @amount
+        end
+    end
+end
+
 def parse_type(type)
     replacements = {
         /^numeric$/i => 'integer',
@@ -112,14 +156,14 @@ def get_root_error_key()
 end
 
 def get_json_path(names)
-    return "#{get_root_data_key()}#{get_parameters(names).join('.')}"
+    return "#{get_root_data_key()}#{get_fields(names).join('.')}"
 end
 
-def get_parameters(names)
-    return names.split(':').map { |n| get_parameter(n.strip) }
+def get_fields(names)
+    return names.split(':').map { |n| get_field(n.strip) }
 end
 
-def get_parameter(name)
+def get_field(name)
     if name[0] == '`' && name[-1] == '`'
         name = name[1..-2]
     elsif name[0] != '[' || name[-1] != ']'
@@ -136,7 +180,7 @@ def get_attributes(hashes)
       value = resolve(value)
       value.gsub!(/\\n/, "\n")
       type = parse_type(type)
-      names = get_parameters(name)
+      names = get_fields(name)
       new_hash = names.reverse.inject(value.to_type(type.camelize.constantize)) { |a, n| add_to_hash(a, n) }
       hash.deep_merge!(new_hash) { |key, old, new| new.kind_of?(Array) ? merge_arrays(old, new) : new }
     end
