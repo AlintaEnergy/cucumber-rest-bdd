@@ -1,89 +1,23 @@
 require 'active_support/inflector'
 
-HAVE_SYNONYM = %{(?:has|have|having|contain|contains|containing|with)}
-RESOURCE_NAME = '[\w\s]+'
-RESOURCE_NAME_CAPTURE = /([\w\s]+)/
-ARTICLE = %{(?:an?|the)}
-FIELD_NAME_SYNONYM = %q{[\w\s]+|`[^`]*`}
-FEWER_MORE_THAN_SYNONYM = %q{(?:fewer|less|more) than|at (?:least|most)}
-INT_AS_WORDS_SYNONYM = %q{zero|one|two|three|four|five|six|seven|eight|nine|ten}
+HAVE_ALTERNATION = "has/have/having/contain/contains/containing/with"
+RESOURCE_NAME_SYNONYM = '\w+\b(?:\s+\w+\b)*?'
+FIELD_NAME_SYNONYM = "#{RESOURCE_NAME_SYNONYM}|`[^`]*`"
+MAXIMAL_FIELD_NAME_SYNONYM = '\w+\b(?:\s+\w+\b)*|`[^`]*`'
+
+ParameterType(
+    name: 'resource_name',
+    regexp: /#{RESOURCE_NAME_SYNONYM}/,
+    transformer: -> (s) { get_resource(s) },
+    use_for_snippets: false
+)
 
 ParameterType(
     name: 'field_name',
-    regexp: /[\w\s]+|`[^`]*`/,
-    transformer: -> (s) { get_fields(s) },
+    regexp: /#{FIELD_NAME_SYNONYM}/,
+    transformer: -> (s) { ResponseField.new(s) },
     use_for_snippets: false
 )
-
-ParameterType(
-  name: 'int_as_words',
-  regexp: /#{INT_AS_WORDS_SYNONYM}/,
-  transformer: -> (s) { to_num(s) }
-)
-
-ParameterType(
-  name: 'fewer_more_than',
-  regexp: /#{FEWER_MORE_THAN_SYNONYM}/,
-  transformer: -> (s) { to_compare(s) }
-)
-
-ParameterType(
-    name: 'list_has_count',
-    regexp: /a|an|(?:(#{FEWER_MORE_THAN_SYNONYM})\s+)?(#{INT_AS_WORDS_SYNONYM})/,
-    transformer: -> (count_mod, count) {
-        ListCountComparison.new(count_mod.nil? ? to_compare(count_mod) : CMP_EQUALS, count.nil? ? to_num(count) : 1)
-    },
-    use_for_snippets: false
-)
-
-CMP_LESS_THAN = '<'
-CMP_MORE_THAN = '>'
-CMP_AT_LEAST = '>='
-CMP_AT_MOST = '<='
-CMP_EQUALS = '='
-
-# take a number modifier string (fewer than, less than, etc) and return an operator '<', etc
-def to_compare(compare)
-    return case compare
-    when 'fewer than' then CMP_LESS_THAN
-    when 'less than' then CMP_LESS_THAN
-    when 'more than' then CMP_MORE_THAN
-    when 'at least' then CMP_AT_LEAST
-    when 'at most' then CMP_AT_MOST
-    else CMP_EQUALS
-    end
-end
-
-# turn a comparison into a string
-def compare_to_string(compare)
-    case compare
-    when CMP_LESS_THAN then 'fewer than '
-    when CMP_MORE_THAN then 'more than '
-    when CMP_AT_LEAST then 'at least '
-    when CMP_AT_MOST then 'at most '
-    when CMP_EQUALS then ''
-    else ''
-    end
-end
-
-# compare two numbers using the fewer_more_than optional modifier
-def num_compare(type, left, right)
-    case type
-    when CMP_LESS_THAN then left < right
-    when CMP_MORE_THAN then left > right
-    when CMP_AT_MOST then left <= right
-    when CMP_AT_LEAST then left >= right
-    when CMP_EQUALS then left == right
-    else left == right
-    end
-end
-
-def to_num(num)
-    if /^(?:zero|one|two|three|four|five|six|seven|eight|nine|ten)$/.match(num)
-        return %w(zero one two three four five six seven eight nine ten).index(num)
-    end
-    return num.to_i
-end
 
 module Boolean; end
 class TrueClass; include Boolean; end
@@ -105,21 +39,21 @@ class String
   end
 end
 
-class ListCountComparison
-    def initialize(type, amount)
-        @type = type
-        @amount = amount
+class ResponseField
+    def initialize(names)
+        @fields = get_fields(names)
     end
 
-    def compare(actual)
-        case @type
-            when CMP_LESS_THAN then actual < @amount
-            when CMP_MORE_THAN then actual > @amount
-            when CMP_AT_MOST then actual <= @amount
-            when CMP_AT_LEAST then actual >= @amount
-            when CMP_EQUALS then actual == @amount
-            else actual == @amount
-        end
+    def to_json_path()
+        return "#{get_root_data_key()}#{@fields.join('.')}"
+    end
+
+    def get_value(type)
+        return @response.get_as_type to_json_path(), parse_type(type)
+    end
+
+    def validate_value(value, regex)
+        raise %/Expected #{json_path} value '#{value}' to match regex: #{regex}\n#{@response.to_json_s}/ if (regex =~ value).nil?
     end
 end
 
@@ -149,10 +83,6 @@ end
 
 def get_root_data_key()
     return ENV.has_key?('data_key') && !ENV['data_key'].empty? ? "$.#{ENV['data_key']}." : "$."
-end
-
-def get_root_error_key()
-    return "$."
 end
 
 def get_json_path(names)
@@ -200,7 +130,15 @@ def merge_arrays(a, b)
     new_length = [a.length, b.length].max
     new_array = Array.new(new_length)
     new_length.times do |n|
-        new_array[n] = b[n] == nil ? a[n] : b[n]
+        if b[n].nil? then
+            new_array[n] = a[n]
+        else
+            if a[n].nil? then
+                new_array[n] = b[n]
+            else
+                new_array[n] = a[n].merge(b[n])
+            end
+        end
     end
     return new_array
 end

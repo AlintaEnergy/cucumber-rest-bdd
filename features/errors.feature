@@ -8,8 +8,8 @@ Feature: Handling error responses
         When I request the error "list"
         Then the request fails because the post was not found
         And the response contains at least one errors
-        And the response has one error
-        And the response has one error with the attributes:
+        And the response has one errors
+        And the response has one errors with the attributes:
             | attribute   | type    | value     |
             | Message     | string  | Not Found |
 

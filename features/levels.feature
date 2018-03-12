@@ -41,7 +41,7 @@ Feature: Request multiple levels of REST api
             | attribute | type   | value |
             | Title     | string | foo   |
             | Body      | string | bar   |
-        Then the comment was created
+        Then the request was successful and the comment was created
         And the response has the attributes:
             | attribute | type   | value |
             | Post Id   | string | 18    |
@@ -58,7 +58,7 @@ Feature: Request multiple levels of REST api
         When I request to create a photo in album "2" for user "1" with:
             | attribute | type   | value |
             | title     | string | foo   |
-        Then the comment was created
+        Then the request was successful and the comment was created
         And the response has the attributes:
             | attribute | type   | value |
             | Album Id  | int    | 2     |

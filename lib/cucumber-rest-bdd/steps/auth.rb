@@ -1,4 +1,4 @@
-Given(/^I retrieve the API Management subscription key secret "(.*?)" from Azure Storage Vault "(.*?)" using tenant "(.*?)" with credentials "(.*?)" and "(.*?)"$/) do |secret_name, vault_name, tenant_id, client_id, client_secret|
+Given("I retrieve the API Management subscription key secret {string} from Azure Storage Vault {string} using tenant {string} with credentials {string} and {string}") do |secret_name, vault_name, tenant_id, client_id, client_secret|
     if @apim_subscription_key.to_s.empty?
         steps %Q{
             Given I retrieve the secret "#{secret_name}" from Azure Storage Vault "#{vault_name}" using tenant "#{tenant_id}" with credentials "#{client_id}" and "#{client_secret}"
@@ -7,14 +7,14 @@ Given(/^I retrieve the API Management subscription key secret "(.*?)" from Azure
     end
 end
 
-Given(/^I add the API Management key header$/) do
+Given("I add the API Management key header") do
     steps %Q{
         And I add Headers:
         | Ocp-Apim-Subscription-Key | #{@apim_subscription_key} |
     }
 end
 
-Given(/^I retrieve the secret "(.*?)" from Azure Storage Vault "(.*?)" using tenant "(.*?)" with credentials "(.*?)" and "(.*?)"$/) do |secret_name, vault_name, tenant_id, client_id, client_secret|
+Given("I retrieve the secret {string} from Azure Storage Vault {string} using tenant {string} with credentials {string} and {string}") do |secret_name, vault_name, tenant_id, client_id, client_secret|
     steps %Q{
         Given I authenticate with Azure tenant "#{tenant_id}" using client credentials "#{client_id}" and "#{client_secret}"
     }
@@ -24,13 +24,13 @@ Given(/^I retrieve the secret "(.*?)" from Azure Storage Vault "(.*?)" using ten
     }
 end
 
-Given(/^I authenticate with Azure tenant "(.*?)" using client credentials "(.*?)" and "(.*?)"$/) do |tenant_id, client_id, client_secret|
+Given("I authenticate with Azure tenant {string} using client credentials {string} and {string}") do |tenant_id, client_id, client_secret|
     steps %Q{
         Given I authenticate with "https://login.windows.net/#{tenant_id}/oauth2/token" using client credentials "#{client_id}" and "#{client_secret}"
     }
 end
 
-Given(/^I authenticate with "(.*?)" using client credentials "(.*?)" and "(.*?)"$/) do |url, client_id, client_secret|
+Given("I authenticate with {string} using client credentials {string} and {string}") do |url, client_id, client_secret|
     steps %Q{
         Given I send "www-x-form-urlencoded" and accept JSON
         When I set form request body to:
@@ -43,7 +43,7 @@ Given(/^I authenticate with "(.*?)" using client credentials "(.*?)" and "(.*?)"
     }
 end
 
-Given(/^I retrieve the secret "([^"]*)" from Azure Storage Vault "([^"]*)" using access token "([^"]*)"$/) do |secret_name, vault_name, access_token|
+Given("I retrieve the secret {string} from Azure Storage Vault {string} using access token {string}") do |secret_name, vault_name, access_token|
     api_version = '2015-06-01'
     url = "https://#{vault_name}.vault.azure.net/secrets/#{secret_name}?api-version=#{api_version}"
     steps %Q{

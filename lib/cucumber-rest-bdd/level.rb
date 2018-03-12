@@ -1,7 +1,12 @@
 require 'cucumber-rest-bdd/types'
 require 'active_support/inflector'
 
-LEVELS = %{((?: (?:for|in|on) #{RESOURCE_NAME}(?: with (?:key|id))? "[^"]*")*)?}%
+ParameterType(
+    name: 'levels',
+    regexp: /((?: (?:for|in|on) #{RESOURCE_NAME_SYNONYM}(?: with (?:key|id))? "[^"]*")*)/,
+    transformer: -> (levels) { Level.new(levels) },
+    use_for_snippets: false
+)
 
 class Level
     @urls = []

@@ -49,7 +49,7 @@ Feature: Dealing with sub objects
             | attribute         | type   | value |
             | title             | string | sunt aut facere repellat provident occaecati excepturi optio reprehenderit |
             | body              | string | quia et suscipit\\nsuscipit recusandae consequuntur expedita et cum\\nreprehenderit molestiae ut ut quas totam\\nnostrum rerum est autem sunt rem eveniet architecto |
-        And the response has 1 comment with attributes:
+        And the response has 1 comments with attributes:
             | attribute | type   | value |
             | name      | string | id labore ex et quam laborum |
             | email     | string | Eliseo@gardner.biz |
@@ -60,20 +60,24 @@ Feature: Dealing with sub objects
         And the response has at least five comments
 
     Scenario: Multiple levels
-        When I set JSON request body to:
-            """
-            {"title":"test","body":"multiple",
-            "comments":[
-            {"common":1,"id":1,"title":"fish","body":"cake","image":{"href":"some_url"}},
-            {"common":1,"id":2,"title":"foo","body":"bar","image":{"href":"some_url"}}
-            ]}
-            """
-        And I send a POST request to "http://test-server/posts"
+        When I request to create a post with:
+            | attribute                     | type    | value    |
+            | title                         | string  | test     |
+            | body                          | string  | multiple |
+            | comments : [0] : common       | integer | 1        |
+            | comments : [0] : id           | integer | 1        |
+            | comments : [0] : title        | string  | fish     |
+            | comments : [0] : body         | string  | cake     |
+            | comments : [0] : image : href | string  | some_url |
+            | comments : [1] : common       | integer | 1        |
+            | comments : [1] : id           | integer | 2        |
+            | comments : [1] : title        | string  | foo      |
+            | comments : [1] : body         | string  | bar      |
+            | comments : [1] : image : href | string  | some_url |
         Then the response has the attributes:
             | attribute | type   | value    |
             | title     | string | test     |
             | body      | string | multiple |
-        And the response has a list of comments
         And the response has a list of 2 comments
         And the response has two comments with attributes:
             | attribute | type    | value |
@@ -81,12 +85,12 @@ Feature: Dealing with sub objects
         And the response has two comments with an image with attributes:
             | attribute | type    | value    |
             | href      | string  | some_url |
-        And the response has one comment with attributes:
+        And the response has one comments with attributes:
             | attribute | type    | value |
             | Id        | integer | 1     |
             | Title     | string  | fish  |
             | Body      | string  | cake  |
-        And the response has one comment with attributes:
+        And the response has one comments with attributes:
             | attribute | type    | value |
             | Id        | integer | 2     |
             | Title     | string  | foo   |
@@ -96,7 +100,7 @@ Feature: Dealing with sub objects
         When I request a list of posts with:
             | `_embed`  | comments |
         Then the request is successful
-        And one post has one comment with attributes:
+        And one post has one comments with attributes:
             | attribute | type    | value |
             | Id        | integer | 1     |
         And at least ten posts contain a list of five comments
