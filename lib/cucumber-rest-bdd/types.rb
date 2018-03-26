@@ -1,8 +1,8 @@
 require 'active_support/inflector'
 
 HAVE_ALTERNATION = "has/have/having/contain/contains/containing/with"
-RESOURCE_NAME_SYNONYM = '\w+\b(?:\s+\w+\b)*?'
-FIELD_NAME_SYNONYM = "#{RESOURCE_NAME_SYNONYM}|`[^`]*`"
+RESOURCE_NAME_SYNONYM = '\w+\b(?:\s+\w+\b)*?|`[^`]*`'
+FIELD_NAME_SYNONYM = "#{RESOURCE_NAME_SYNONYM}"
 MAXIMAL_FIELD_NAME_SYNONYM = '\w+\b(?:\s+\w+\b)*|`[^`]*`'
 
 ParameterType(
@@ -76,8 +76,12 @@ def parse_type(type)
 end
 
 def get_resource(name)
-    name = name.parameterize
-    name = (ENV.has_key?('resource_single') && ENV['resource_single'] == 'true') ? name.singularize : name.pluralize
+    if name[0] == '`' && name[-1] == '`'
+        name = name[1..-2]
+    else
+        name = name.parameterize
+        name = (ENV.has_key?('resource_single') && ENV['resource_single'] == 'true') ? name.singularize : name.pluralize
+    end
     return name
 end
 
