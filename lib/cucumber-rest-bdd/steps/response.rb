@@ -17,11 +17,13 @@ Then("the response #{HAVE_ALTERNATION} {field_name} of type {word}") do |field, 
     end
 
     type = 'string' if regex.nil?
-    field.validate_value(field.get_value(type), Regexp.new(regex))
+    value = field.get_value(@response, type)
+    field.validate_value(@response, value.to_s, Regexp.new(regex))
 end
 
 Then("the response #{HAVE_ALTERNATION} {field_name} of type {word} that matches {string}") do |field, type, regex|
-    field.validate_value(field.get_value(type), Regexp.new(regex))
+    value = field.get_value(@response, type)
+    field.validate_value(@response, value.to_s, Regexp.new(regex))
 end
 
 Then("the response is a list of/containing {list_has_count} {field_name}") do |list_comparison, item|

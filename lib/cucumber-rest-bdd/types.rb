@@ -2,8 +2,8 @@ require 'active_support/inflector'
 
 HAVE_ALTERNATION = "has/have/having/contain/contains/containing/with"
 RESOURCE_NAME_SYNONYM = '\w+\b(?:\s+\w+\b)*?|`[^`]*`'
-FIELD_NAME_SYNONYM = "#{RESOURCE_NAME_SYNONYM}"
-MAXIMAL_FIELD_NAME_SYNONYM = '\w+\b(?:\s+\w+\b)*|`[^`]*`'
+FIELD_NAME_SYNONYM = '\w+\b(?:(?:\s+:)?\s+\w+\b)*?|`[^`]*`'
+MAXIMAL_FIELD_NAME_SYNONYM = '\w+\b(?:(?:\s+:)?\s+\w+\b)*|`[^`]*`'
 
 ParameterType(
     name: 'resource_name',
@@ -48,23 +48,23 @@ class ResponseField
         return "#{get_root_data_key()}#{@fields.join('.')}"
     end
 
-    def get_value(type)
-        return @response.get_as_type to_json_path(), parse_type(type)
+    def get_value(response, type)
+        return response.get_as_type to_json_path(), parse_type(type)
     end
 
-    def validate_value(value, regex)
-        raise %/Expected #{json_path} value '#{value}' to match regex: #{regex}\n#{@response.to_json_s}/ if (regex =~ value).nil?
+    def validate_value(response, value, regex)
+        raise %/Expected #{json_path} value '#{value}' to match regex: #{regex}\n#{response.to_json_s}/ if (regex =~ value).nil?
     end
 end
 
 def parse_type(type)
     replacements = {
-        /^numeric$/i => 'integer',
-        /^int$/i => 'integer',
-        /^long$/i => 'integer',
-        /^number$/i => 'integer',
-        /^decimal$/i => 'float',
-        /^double$/i => 'float',
+        /^numeric$/i => 'numeric',
+        /^int$/i => 'numeric',
+        /^long$/i => 'numeric',
+        /^number$/i => 'numeric',
+        /^decimal$/i => 'numeric',
+        /^double$/i => 'numeric',
         /^bool$/i => 'boolean',
         /^null$/i => 'nil_class',
         /^nil$/i => 'nil_class',
@@ -111,6 +111,7 @@ end
 def get_attributes(hashes)
     attributes = hashes.each_with_object({}) do |row, hash|
       name, value, type = row["attribute"], row["value"], row["type"]
+      value = resolve_functions(value)
       value = resolve(value)
       value.gsub!(/\\n/, "\n")
       type = parse_type(type)
@@ -118,6 +119,19 @@ def get_attributes(hashes)
       new_hash = names.reverse.inject(value.to_type(type.camelize.constantize)) { |a, n| add_to_hash(a, n) }
       hash.deep_merge!(new_hash) { |key, old, new| new.kind_of?(Array) ? merge_arrays(old, new) : new }
     end
+end
+
+def resolve_functions(value)
+    value.gsub!(/\[([a-zA-Z0-9_]+)\]/) do |s|
+        s.gsub!(/[\[\]]/, '')
+        case s.downcase
+        when "datetime"
+            Time.now.strftime("%Y%m%d%H%M%S")
+        else
+            raise 'Unrecognised function ' + s + '?'
+        end
+    end
+    value
 end
 
 def add_to_hash(a, n)
