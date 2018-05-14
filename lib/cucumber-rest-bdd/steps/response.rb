@@ -31,7 +31,37 @@ Then("the response is a list of/containing {list_has_count} {field_name}") do |l
     raise %/Expected #{list_comparison.to_string()} items in array for path '#{get_root_data_key()}', found: #{list.count}\n#{@response.to_json_s}/ if !list_comparison.compare(list.count)
 end
 
-Then("the response( {list_nesting}) #{HAVE_ALTERNATION} (the )(following )attributes:") do |nesting, attributes|
+# Responses without nesting
+
+Then("the response #{HAVE_ALTERNATION} (the )(following )attributes:") do |attributes|
+    expected = get_attributes(attributes.hashes)
+    data = @response.get get_root_data_key()
+    raise %/Response did not match:\n#{expected.inspect}\n#{data}/ if data.empty? || !data.deep_include?(expected)
+end
+
+Then("the response #{HAVE_ALTERNATION} (the )(following )value {string}") do |value|
+    expected = value
+    data = @response.get get_root_data_key()
+    raise %/Response did not match: #{expected}\n#{data}/ if data.empty? || !data.include?(expected)
+end
+
+Then("{list_has_count} {field_name} #{HAVE_ALTERNATION} (the )(following )(data )attributes:") do |list_comparison, count_item, attributes|
+    expected = get_attributes(attributes.hashes)
+    data = @response.get get_root_data_key()
+    matched = data.select { |item| !item.empty? && item.deep_include?(expected) }
+    raise %/Expected #{list_comparison.to_string()} items in array that matched:\n#{expected.inspect}\n#{data}/ if !list_comparison.compare(matched.count)
+end
+
+Then("{list_has_count} {field_name} #{HAVE_ALTERNATION} (the )(following )value {string}") do |list_comparison, count_item, value|
+    expected = value
+    data = @response.get get_root_data_key()
+    matched = data.select { |item| !item.empty? && item.include?(expected) }
+    raise %/Expected #{list_comparison.to_string()} items in array that matched:\n#{expected}\n#{data}/ if !list_comparison.compare(matched.count)
+end
+
+# Responses with nesting
+
+Then("the response {list_nesting} #{HAVE_ALTERNATION} (the )(following )attributes:") do |nesting, attributes|
     expected = get_attributes(attributes.hashes)
     nesting.push({
         root: true,
@@ -41,7 +71,7 @@ Then("the response( {list_nesting}) #{HAVE_ALTERNATION} (the )(following )attrib
     raise %/Could not find a match for: #{nesting.match}\n#{expected.inspect}\n#{@response.to_json_s}/ if data.empty? || !nest_match_attributes(data, nesting.grouping, expected, false)
 end
 
-Then("the response( {list_nesting}) #{HAVE_ALTERNATION} (the )(following )value {string}") do |nesting, value|
+Then("the response {list_nesting} #{HAVE_ALTERNATION} (the )(following )value {string}") do |nesting, value|
     expected = value
     nesting.push({
         root: true,
@@ -60,7 +90,7 @@ Then("the response {list_nesting}") do |nesting|
     raise %/Could not find a match for: #{nesting.match}\n#{@response.to_json_s}/ if data.empty? || !nest_match_attributes(data, nesting.grouping, {}, false)
 end
 
-Then("{list_has_count} {field_name}( {list_nesting}) #{HAVE_ALTERNATION} (the )(following )(data )attributes:") do |list_comparison, count_item, nesting, attributes|
+Then("{list_has_count} {field_name} {list_nesting} #{HAVE_ALTERNATION} (the )(following )(data )attributes:") do |list_comparison, count_item, nesting, attributes|
     expected = get_attributes(attributes.hashes)
     nesting.push({
         root: true,

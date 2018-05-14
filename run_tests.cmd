@@ -7,4 +7,4 @@ set resource_single=false
 set data_key=
 set error_key=
 set set_parent_id=true
-cucumber
+cucumber features/response.feature -v -b

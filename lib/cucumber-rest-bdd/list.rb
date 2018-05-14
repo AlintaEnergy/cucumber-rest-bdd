@@ -5,14 +5,17 @@ INT_AS_WORDS_SYNONYM = %q{zero|one|two|three|four|five|six|seven|eight|nine|ten}
 
 ParameterType(
     name: 'list_has_count',
-    regexp: /a|an|(?:(#{FEWER_MORE_THAN_SYNONYM})\s+)?(#{INT_AS_WORDS_SYNONYM}|\d+)/,
-    transformer: -> (type, amount) { ListCountComparison.new(type, amount) },
+    regexp: /a|an|(?:(?:#{FEWER_MORE_THAN_SYNONYM})\s+)?(?:#{INT_AS_WORDS_SYNONYM}|\d+)/,
+    transformer: -> (match) {
+        matches = /(?:(#{FEWER_MORE_THAN_SYNONYM})\s+)?(#{INT_AS_WORDS_SYNONYM}|\d+)/.match(match)
+        return ListCountComparison.new(matches[1], matches[2])
+    },
     use_for_snippets: false
 )
 
 ParameterType(
     name: 'list_nesting',
-    regexp: %r{((?:(?:#{HAVE_ALTERNATION.split('/').join('|')})\s+(?:a list of\s+)?(?:a|an|(?:(?:#{FEWER_MORE_THAN_SYNONYM})\s+)?(?:#{INT_AS_WORDS_SYNONYM}|\d+))\s+(?:#{FIELD_NAME_SYNONYM})\s*)*)},
+    regexp: %r{(?:(?:#{HAVE_ALTERNATION.split('/').join('|')})\s+(?:a list of\s+)?(?:a|an|(?:(?:#{FEWER_MORE_THAN_SYNONYM})\s+)?(?:#{INT_AS_WORDS_SYNONYM}|\d+))\s+(?:#{FIELD_NAME_SYNONYM})\s*)+},
     transformer: -> (match) { ListNesting.new(match) },
     use_for_snippets: false
 )
@@ -73,6 +76,7 @@ class ListNesting
 end
 
 class ListCountComparison
+   
     def initialize(type, amount)
         @type = type.nil? ? CMP_EQUALS : to_compare(type)
         @amount = amount.nil? ? 1 : to_num(amount)

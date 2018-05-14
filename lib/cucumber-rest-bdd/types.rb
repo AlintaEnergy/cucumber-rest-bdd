@@ -26,19 +26,6 @@ class FalseClass; include Boolean; end
 module Enum; end
 class String; include Enum; end
 
-class String
-  def to_type(type)
-    # cannot use 'case type' which checks for instances of a type rather than type equality
-    if type == Boolean then !(self =~ /true|yes/i).nil?
-    elsif type == Enum then self.upcase.tr(" ", "_")
-    elsif type == Float then self.to_f
-    elsif type == Integer then self.to_i
-    elsif type == NilClass then nil
-    else self
-    end
-  end
-end
-
 class ResponseField
     def initialize(names)
         @fields = get_fields(names)
@@ -68,11 +55,39 @@ def parse_type(type)
         /^bool$/i => 'boolean',
         /^null$/i => 'nil_class',
         /^nil$/i => 'nil_class',
+        /^string$/i => 'string',
         /^text$/i => 'string'
     }
     type.tr(' ', '_')
     replacements.each { |k,v| type.gsub!(k, v) }
     type
+end
+
+def string_to_type(value, type)
+    replacements = {
+        /^numeric$/i => 'integer',
+        /^int$/i => 'integer',
+        /^long$/i => 'integer',
+        /^number$/i => 'integer',
+        /^decimal$/i => 'float',
+        /^double$/i => 'float',
+        /^bool$/i => 'boolean',
+        /^null$/i => 'nil_class',
+        /^nil$/i => 'nil_class',
+        /^string$/i => 'string',
+        /^text$/i => 'string'
+    }
+    type.tr(' ', '_')
+    replacements.each { |k,v| type.gsub!(k, v) }
+    type = type.camelize.constantize
+    # cannot use 'case type' which checks for instances of a type rather than type equality
+    if type == Boolean then !(value =~ /true|yes/i).nil?
+    elsif type == Enum then value.upcase.tr(" ", "_")
+    elsif type == Float then value.to_f
+    elsif type == Integer then value.to_i
+    elsif type == NilClass then nil
+    else value
+    end
 end
 
 def get_resource(name)
@@ -114,9 +129,8 @@ def get_attributes(hashes)
       value = resolve_functions(value)
       value = resolve(value)
       value.gsub!(/\\n/, "\n")
-      type = parse_type(type)
       names = get_fields(name)
-      new_hash = names.reverse.inject(value.to_type(type.camelize.constantize)) { |a, n| add_to_hash(a, n) }
+      new_hash = names.reverse.inject(string_to_type(value, type)) { |a, n| add_to_hash(a, n) }
       hash.deep_merge!(new_hash) { |key, old, new| new.kind_of?(Array) ? merge_arrays(old, new) : new }
     end
 end
