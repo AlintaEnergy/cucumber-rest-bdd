@@ -1,9 +1,9 @@
 Gem::Specification.new do |s|
   s.name          = 'alinta-cucumber-rest-bdd'
-  s.version       = '0.5.20'
+  s.version       = '0.5.21'
   s.version       = "#{s.version}-#{ENV['TRAVIS_BUILD_NUMBER']}" if ENV['TRAVIS'] && ENV['TRAVIS_TAG'] == ''
   s.platform      = Gem::Platform::RUBY
-  s.date          = '2018-04-17'
+  s.date          = '2018-05-15'
   s.summary       = 'BDD Rest API specifics for cucumber'
   s.description   = 'Series of BDD cucumber rules for testing API endpoints'
   s.authors       = ["Harry Bragg", "Matt Hosking"]
