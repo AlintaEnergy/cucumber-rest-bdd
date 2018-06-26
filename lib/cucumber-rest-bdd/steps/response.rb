@@ -45,16 +45,16 @@ Then("the response #{HAVE_ALTERNATION} (the )(following )value {string}") do |va
     raise %/Response did not match: #{expected}\n#{data}/ if data.empty? || !data.include?(expected)
 end
 
-Then("{list_has_count} {field_name} #{HAVE_ALTERNATION} (the )(following )(data )attributes:") do |list_comparison, count_item, attributes|
+Then("{list_has_count} {field_name} #{HAVE_ALTERNATION} (the )(following )(data )attributes:") do |list_comparison, field, attributes|
     expected = get_attributes(attributes.hashes)
-    data = @response.get get_root_data_key()
+    data = field.get_value(@response, 'array')
     matched = data.select { |item| !item.empty? && item.deep_include?(expected) }
     raise %/Expected #{list_comparison.to_string()} items in array that matched:\n#{expected.inspect}\n#{data}/ if !list_comparison.compare(matched.count)
 end
 
-Then("{list_has_count} {field_name} #{HAVE_ALTERNATION} (the )(following )value {string}") do |list_comparison, count_item, value|
+Then("{list_has_count} {field_name} #{HAVE_ALTERNATION} (the )(following )value {string}") do |list_comparison, field, value|
     expected = value
-    data = @response.get get_root_data_key()
+    data = field.get_value(@response, 'array')
     matched = data.select { |item| !item.empty? && item.include?(expected) }
     raise %/Expected #{list_comparison.to_string()} items in array that matched:\n#{expected}\n#{data}/ if !list_comparison.compare(matched.count)
 end
