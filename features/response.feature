@@ -33,14 +33,12 @@ Feature: Dealing with sub objects
         When I request a list of comments with:
             | `_expand` | post |
             | Post ID   | 1    |
-        Then the response is a list of more than 1 comment
-        And one comment has the following attributes:
+        Then the response is a list of more than 1 item
+        And the response is a list with at least one entry with the following attributes:
             | attribute    | type   | value |
             | name         | string | id labore ex et quam laborum |
             | email        | string | Eliseo@gardner.biz |
             | body         | string | laudantium enim quasi est quidem magnam voluptate ipsam eos\\ntempora quo necessitatibus\\ndolor quam autem quasi\\nreiciendis et nam sapiente accusantium |
-            | post : title | string | sunt aut facere repellat provident occaecati excepturi optio reprehenderit |
-            | post : body  | string | quia et suscipit\\nsuscipit recusandae consequuntur expedita et cum\\nreprehenderit molestiae ut ut quas totam\\nnostrum rerum est autem sunt rem eveniet architecto |
 
     Scenario: Match an item with a list of items
         When I request the post "1" with:
@@ -49,7 +47,7 @@ Feature: Dealing with sub objects
             | attribute         | type   | value |
             | title             | string | sunt aut facere repellat provident occaecati excepturi optio reprehenderit |
             | body              | string | quia et suscipit\\nsuscipit recusandae consequuntur expedita et cum\\nreprehenderit molestiae ut ut quas totam\\nnostrum rerum est autem sunt rem eveniet architecto |
-        And the response has 1 comments with attributes:
+        And the response has 1 comment with attributes:
             | attribute | type   | value |
             | name      | string | id labore ex et quam laborum |
             | email     | string | Eliseo@gardner.biz |
@@ -58,6 +56,23 @@ Feature: Dealing with sub objects
             | attribute | type    | value |
             | Post Id   | integer | 1     |
         And the response has at least five comments
+
+    Scenario: Match a list of items within a list of items
+        When I request a list of posts with:
+            | `_embed`  | comments |
+        Then the response is a list with at least one entry with the following attributes:
+            | attribute         | type   | value |
+            | title             | string | sunt aut facere repellat provident occaecati excepturi optio reprehenderit |
+            | body              | string | quia et suscipit\\nsuscipit recusandae consequuntur expedita et cum\\nreprehenderit molestiae ut ut quas totam\\nnostrum rerum est autem sunt rem eveniet architecto |
+        And the response is a list with at least one entry with 1 comment with attributes:
+            | attribute | type   | value |
+            | name      | string | id labore ex et quam laborum |
+            | email     | string | Eliseo@gardner.biz |
+            | body      | string | laudantium enim quasi est quidem magnam voluptate ipsam eos\\ntempora quo necessitatibus\\ndolor quam autem quasi\\nreiciendis et nam sapiente accusantium |
+        And the response is a list with at least one entry with 5 comments with attributes:
+            | attribute | type    | value |
+            | Post Id   | integer | 1     |
+        And the response is a list with at least one entry with at least five comments
 
     Scenario: Multiple levels
         When I request to create a post with:
@@ -100,8 +115,8 @@ Feature: Dealing with sub objects
         When I request a list of posts with:
             | `_embed`  | comments |
         Then the request is successful
-        And one post has one comments with attributes:
+        And the response is a list with one entry with one comment with attributes:
             | attribute | type    | value |
             | Id        | integer | 1     |
-        And at least ten posts contain a list of five comments
-        And more than 95 posts contain more than four comments
+        And the response is a list with at least ten entries with five comments
+        And the response is a list with more than 95 entries with more than four comments

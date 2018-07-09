@@ -43,10 +43,10 @@ def get_child_data(level, data)
     else
         levelKey = case level[:type]
             when 'single' then get_field(level[:key])
-            when 'multiple' then get_field(level[:key])
-            when 'list' then get_resource(level[:key])
+            when 'multiple' then get_list_field(level[:key])
+            when 'list' then get_list_field(level[:key])
         end
-        raise %/Key not found: #{level[:key]} as #{levelKey} in #{data}/ if !data[levelKey]
+        raise %/Key not found: #{level[:key]} as #{levelKey} in #{data}/ if data.is_a?(Array) || !data[levelKey]
         return data[levelKey]
     end
 end

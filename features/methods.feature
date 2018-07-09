@@ -17,22 +17,22 @@ Feature: Performing different rest methods
         When I request a list of posts
         Then the request was successful
         And the response is a list of at least 2 posts
-        And one post has the following attributes:
+        And the response is a list with one entry with the following attributes:
             | attribute | type    | value |
             | User Id   | numeric | 1     |
             | Id        | numeric | 1     |
             | Title     | string  | sunt aut facere repellat provident occaecati excepturi optio reprehenderit |
             | Body      | string  | quia et suscipit\\nsuscipit recusandae consequuntur expedita et cum\\nreprehenderit molestiae ut ut quas totam\\nnostrum rerum est autem sunt rem eveniet architecto |
-        And one post has the following attributes:
+        And the response is a list with one entry with the following attributes:
             | attribute | type    | value |
             | User Id   | numeric | 1     |
             | Id        | numeric | 2     |
             | Title     | string  | qui est esse |
             | Body      | string  | est rerum tempore vitae\\nsequi sint nihil reprehenderit dolor beatae ea dolores neque\\nfugiat blanditiis voluptate porro vel nihil molestiae ut reiciendis\\nqui aperiam non debitis possimus qui neque nisi nulla |
-        And ten posts have the following attributes:
+        And the response is a list with ten entries with the following attributes:
             | attribute | type    | value |
             | User Id   | numeric | 5     |
-        And at most 20 posts have the following attributes:
+        And the response is a list with at most 20 entries with the following attributes:
             | attribute | type    | value |
             | User Id   | numeric | 5     |
 
@@ -42,19 +42,19 @@ Feature: Performing different rest methods
         Then the request is successful
         And the response is a list of at least 2 posts
         And the response is a list of fewer than 100 posts
-        And one post has the following attributes:
+        And the response is a list with one entry with the following attributes:
             | attribute | type    | value |
             | User Id   | numeric | 2     |
             | Id        | numeric | 11    |
             | Title     | string  | et ea vero quia laudantium autem |
             | Body      | string  | delectus reiciendis molestiae occaecati non minima eveniet qui voluptatibus\\naccusamus in eum beatae sit\\nvel qui neque voluptates ut commodi qui incidunt\nut animi commodi |
-        And one post has the following attributes:
+        And the response is a list with one entry with the following attributes:
             | attribute | type    | value |
             | User Id   | numeric | 2     |
             | Id        | numeric | 12    |
             | Title     | string  | in quibusdam tempore odit est dolorem |
             | Body      | string  | itaque id aut magnam\\npraesentium quia et ea odit et ea voluptas et\\nsapiente quia nihil amet occaecati quia id voluptatem\\nincidunt ea est distinctio odio |
-        And more than two posts has the following attributes:
+        And the response is a list with more than two entries with the following attributes:
             | attribute | type    | value |
             | User Id   | numeric | 2     |
 
