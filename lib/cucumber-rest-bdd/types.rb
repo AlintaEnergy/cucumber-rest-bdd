@@ -123,6 +123,18 @@ def get_field(name)
     return name
 end
 
+def get_list_field(name)
+    if name[0] == '`' && name[-1] == '`'
+        name = name[1..-2]
+    elsif name[0] != '[' || name[-1] != ']'
+        separator = ENV.has_key?('field_separator') ? ENV['field_separator'] : '_'
+        name = name.parameterize(separator: separator)
+        name = name.pluralize
+        name = name.camelize(:lower) if (ENV.has_key?('field_camel') && ENV['field_camel'] == 'true')
+    end
+    return name
+end
+
 def get_attributes(hashes)
     attributes = hashes.each_with_object({}) do |row, hash|
       name, value, type = row["attribute"], row["value"], row["type"]

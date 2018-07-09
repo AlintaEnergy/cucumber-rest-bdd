@@ -17,7 +17,7 @@ Feature: Request multiple levels of REST api
         When I request a list of comments for post "1"
         Then the request was successful
         And the response is a list of more than 4 comments
-        And one comment has the attributes:
+        And the response is a list with one entry with the attributes:
             | attribute | type   | value |
             | id        | int    | 1     |
 
@@ -32,7 +32,7 @@ Feature: Request multiple levels of REST api
         When I request a list of photos for album "1" for user "1"
         Then the request was successful
         And the response is a list of more than 2 photos
-        And one photo has the attributes:
+        And the response is a list with one entry with the attributes:
             | attribute | type   | value                                              |
             | title     | string | accusamus beatae ad facilis cum similique qui sunt |
 
@@ -49,7 +49,7 @@ Feature: Request multiple levels of REST api
             | Body      | string | bar   |
         When I request a list of comments for post "18"
         Then the request was successful
-        And one comment has the attributes:
+        And the response is a list with one entry with the attributes:
             | attribute | type   | value |
             | Title     | string | foo   |
             | Body      | string | bar   |
@@ -65,7 +65,7 @@ Feature: Request multiple levels of REST api
             | Title     | string | foo   |
         When I request a list of photos for album "2" for user "1"
         Then the request was successful
-        And one comment has the attributes:
+        And the response is a list with one entry with the attributes:
             | attribute | type   | value |
             | Title     | string | foo   |
 
@@ -74,7 +74,7 @@ Feature: Request multiple levels of REST api
         Then the request was successful
         When I request a list of comments for post "19"
         Then the request was successful
-        And zero comments have the attributes:
+        And the response is a list with zero entries with the attributes:
             | attribute | type | value |
             | id        | int  | 91    |
 
@@ -91,7 +91,7 @@ Feature: Request multiple levels of REST api
             | Body      | string | bar   |
         When I request a list of comments for post "21"
         Then the request was successful
-        And one comment has the attributes:
+        And the response is a list with one entry with the attributes:
             | attribute | type   | value |
             | Name      | string | foo   |
             | Body      | string | bar   |
@@ -109,7 +109,7 @@ Feature: Request multiple levels of REST api
             | Body      | string | bar   |
         When I request a list of comments for post "22"
         Then the request was successful
-        And one comment has the attributes:
+        And the response is a list with one entry with the attributes:
             | attribute | type   | value |
             | Title     | string | foo   |
             | Body      | string | bar   |
