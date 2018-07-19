@@ -1,4 +1,4 @@
 @echo off
 call gem build cucumber-rest-bdd.gemspec
-call gem install alinta-cucumber-rest-bdd-0.5.23.gem
+call gem install alinta-cucumber-rest-bdd-0.6.1.gem
 pause

@@ -1,5 +1,5 @@
 Gem::Specification.new do |s|
-  s.name          = 'cucumber-rest-bdd'
+  s.name          = 'alinta-cucumber-rest-bdd'
   s.version       = if ENV['TRAVIS'] && ENV['TRAVIS_TAG'] == ''
                       "0.6.1-#{ENV['TAVIS_BUILD_NUMBER']}"
                     else
